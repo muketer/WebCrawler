@@ -1,0 +1,92 @@
+create table SearchInformation(
+	searchKeywords	VARCHAR2(100) not null,
+	age				integer,
+	sex				VARCHAR(10)	  
+)
+
+select * from searchinformation
+
+ALTER TABLE SearchInformation ADD (
+	daumscore	number
+)
+
+CREATE SEQUENCE SearchInformation_SEQ
+START WITH 1
+INCREMENT BY 1
+
+CREATE TABLE temp AS SELECT no, searchKeywords, age, sex FROM searchinformation
+
+select * from temp
+
+DROP TABLE searchinformation
+
+RENAME temp TO searchinformation
+
+-- 이미 돼있는 설정은 또 쓰면 에러 남. 여기서는 not null
+ALTER TABLE searchinformation MODIFY ( no integer primary key)
+
+select * from SEARCHINFORMATION
+
+insert into searchinformation values(SearchInformation_SEQ.nextval, '사과 과일', 30, '남')
+
+insert into searchinformation values(1, '사과 과일', 30, '남')
+
+delete from SEARCHINFORMATION
+
+drop sequence SearchInformation_SEQ
+
+CREATE SEQUENCE SearchInformation_SEQ
+START WITH 1
+INCREMENT BY 1
+
+insert into SEARCHINFORMATION values(
+	(select nvl(max(no), 0)+1 from SEARCHINFORMATION),
+	'사과 과일',
+	30,
+	'남'
+)
+
+insert into SEARCHINFORMATION values(
+	(select max(no)+1 from SEARCHINFORMATION),
+	'과일 제철',
+	29,
+	'남'
+)
+
+insert into SEARCHINFORMATION values(
+	(select max(no)+1 from SEARCHINFORMATION),
+	'제철 과일은 몸에 좋지',
+	28,
+	'남'
+)
+
+insert into SEARCHINFORMATION values(
+	(select max(no)+1 from SEARCHINFORMATION),
+	'   과연 제철 과일이 몸에 좋을까  ',
+	27,
+	'남'
+)
+
+insert into SEARCHINFORMATION values(
+	(select max(no)+1 from SEARCHINFORMATION),
+	' 아무래도 제철 과일이 좋긴 하겠지요  ',
+	25,
+	'남'
+)
+
+select * from searchinformation order by no
+
+insert into searchinformation values(
+	(CASE
+	    WHEN (select count(*) from searchinformation)=0 THEN (select nvl(max(no), 0)+1 from SEARCHINFORMATION)
+	    ELSE (select max(no)+1 from SEARCHINFORMATION)
+	END),
+	'과일 제철',
+	29,
+	'남'
+)
+	
+	
+	
+	
+

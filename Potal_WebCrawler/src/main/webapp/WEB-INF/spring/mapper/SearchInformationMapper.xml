@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.muketer.PotalWebCrawler.DAOInterface.SearchInformationDAO">
+	<insert id="dataInsert" parameterType="map">
+		insert into searchinformation values(
+			(CASE
+			    WHEN (select count(*) from searchinformation)=0 THEN (select nvl(max(no), 0)+1 from SEARCHINFORMATION)
+			    ELSE (select max(no)+1 from SEARCHINFORMATION)
+			END),
+			#{searchKeywords},
+			#{age},
+			#{sex}
+		)
+	</insert>
+</mapper>
