@@ -23,8 +23,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CommonSearcher {
+	
+	private static final Logger logger = LoggerFactory.getLogger(CommonSearcher.class);
 	
 	// ------------------------------- 멤버 필드 ---------------------------------
 	
@@ -105,6 +109,7 @@ public class CommonSearcher {
 	
 	public Map<Integer, List<Document>> parse(){
 		String completedSearchQuery = makeSearchQuery(pageStartQuery);
+		
 		List<Document> searchOutput_pageDocs = makeDocumentList_searchPage(completedSearchQuery);
 		Map<Integer, List<Document>> searchOutput_linkPages = makeDocumentList_linkPage(searchOutput_pageDocs);
 		return searchOutput_linkPages;
@@ -118,13 +123,20 @@ public class CommonSearcher {
 		String pageCountString = "";
 		Document doc = null;
 		
+		// 테스트
+		System.out.println("=============================== searchPage Document List 생성 시작");
+		
 		for(int i = 0 ; i < limitPageNo ; pageCountInt += increasingNo_makeSearchPage){
-			pageCountString = String.valueOf(pageCountInt);
+			pageCountString = String.valueOf(pageCountInt);			
 			doc = makeDocument(makeDocumentType_defaultAtThisPortal,
 					charSet_defaultAtThisPortal, searchUri+pageCountString);
 			docs.add(doc);
 			i++;
 		}
+		
+		// 테스트
+		System.out.println("=============================== searchPage Document List 생성 완료");
+		
 		return docs;
 	}
 	
@@ -132,6 +144,9 @@ public class CommonSearcher {
 		Map<Integer, List<Document>> searchOutput_linkPages = new HashMap<Integer, List<Document>>();
 		Elements searchOutput_linkTitleElements = null;
 		int pageNo = 1;
+		
+		// 테스트
+		System.out.println("=============================== linkPage Document List 생성 시작");
 		
 		for(Document doc : searchOutput_pageDocs){
 			// 이 처리에 대응하는 "검색 결과가 없습니다" 등의 메시지 보여주는 기능도 필요
@@ -143,6 +158,10 @@ public class CommonSearcher {
 			}
 			pageNo++;
 		}
+		
+		// 테스트
+		System.out.println("=============================== linkPage Document List 생성 완료");
+		
 		return searchOutput_linkPages;
 	}
 	
@@ -157,8 +176,13 @@ public class CommonSearcher {
 		searchOutput_linkPages.put(pageNo, page_linkPages);
 	}
 	
-	protected void makeLinkPage(Element searchOutput_linkTitleElement, List<Document> page_linkPages){
+	protected void makeLinkPage(Element searchOutput_linkTitleElement, List<Document> page_linkPages){		
 		String searchOutput_linkUri = searchOutput_linkTitleElement.attr("href");
+		
+		// 테스트
+		logger.info("makeDocumentList - makeLinkPage / searchOutput_linkUri : "+searchOutput_linkUri);
+		System.out.println("-------------------------------");
+		
 		Document doc = makeDocument(makeDocumentType_makeLinkPage, charset_makeLinkPage, searchOutput_linkUri);
 		page_linkPages.add(doc);
 	}
@@ -167,7 +191,7 @@ public class CommonSearcher {
 	
 	// ------------------------------- Document 생성 관련 --------------------------------
 	
-	protected Document makeDocument(String type, String charset, String searchUri){
+	protected Document makeDocument(String type, String charset, String searchUri){		
 		switch(type){
 		case "jsoupConnect" : return jsoupConnect(searchUri);
 		case "parseOpenStream" : return parseOpenStream(searchUri, charset);
@@ -177,6 +201,10 @@ public class CommonSearcher {
 	}
 	
 	private Document jsoupConnect(String searchUri){
+		// 테스트
+		logger.info("jsoupConnect / searchUri : "+searchUri);
+		System.out.println("-------------------------------");
+		
 		try{
 			return Jsoup.connect(searchUri).userAgent("Mozilla/5.0").timeout(5000).get();
 		}catch(IOException e){
@@ -186,6 +214,11 @@ public class CommonSearcher {
 	}
 	
 	private Document parseOpenStream(String searchUri, String charset){
+		// 테스트
+		logger.info("parseOpenStream / searchUri : "+searchUri);
+		logger.info("parseOpenStream / charset : "+charset);
+		System.out.println("-------------------------------");
+		
 		try{
 			return Jsoup.parse(new URL(searchUri).openStream(), charset, searchUri);
 		}catch(SSLHandshakeException e){
@@ -201,6 +234,10 @@ public class CommonSearcher {
 	}
 	
 	private Document httpGet(String searchUri){
+		// 테스트
+		logger.info("httpGet / searchUri : "+searchUri);
+		System.out.println("-------------------------------");
+		
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(searchUri);
 		return executeResponse(httpClient, httpGet);

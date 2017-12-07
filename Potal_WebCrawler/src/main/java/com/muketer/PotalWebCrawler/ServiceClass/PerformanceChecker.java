@@ -3,12 +3,15 @@ package com.muketer.PotalWebCrawler.ServiceClass;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.muketer.PotalWebCrawler.ServiceInterface.I_PerformanceChecker;
 
 @Service
 public class PerformanceChecker implements I_PerformanceChecker{
+	
 	/**
 	 * 검색 키워드 매칭률 산정 기준
 	 * 
@@ -23,6 +26,8 @@ public class PerformanceChecker implements I_PerformanceChecker{
 	 * +a
 	 * 
 	 */
+	
+	private static final Logger logger = LoggerFactory.getLogger(PerformanceChecker.class);
 	
 	private long searchLinkOutputPageNo, documentTextSize;
 	private double searchRunTime, eachMatchingScore, totalMatchingScore, finalScore;
@@ -55,6 +60,8 @@ public class PerformanceChecker implements I_PerformanceChecker{
 		return finalScore;
 	}
 	
+	
+	// 점수가 0인 부분이 있으면 여기서 에러 날 것
 	private void computeFinalScore(){
 		double totalMatchingScoreWeight = 0.55, eachMatchingScoreWeight = 0.25,
 				searchRunTimeWeight = 0.1, searchLinkOutputPageNoWeight = 0.1,
@@ -63,6 +70,18 @@ public class PerformanceChecker implements I_PerformanceChecker{
 				eachMatchingScore*eachMatchingScoreWeight+
 				1/searchRunTime*searchRunTimeWeight)*subWeight1+
 				(double)searchLinkOutputPageNo*searchLinkOutputPageNoWeight*subWeight2;
+	}
+	
+	private double scoreEachMatchingKeywords(int[] eachMatchingNos){
+		double eachMatchingScore = 0;
+		for(int matchingNo : eachMatchingNos) {
+			if(matchingNo==0||documentTextSize==0)
+				eachMatchingScore += 0;
+			eachMatchingScore += (double)matchingNo/documentTextSize;
+		}
+		if(eachMatchingScore==0||documentTextSize==0)
+			return 0;
+		return eachMatchingScore /= eachMatchingNos.length;
 	}
 	
 	private double scoreTotalMatchingKeywords(int totalMatchingNo){
@@ -74,37 +93,6 @@ public class PerformanceChecker implements I_PerformanceChecker{
 		return (double)totalMatchingNo/totalRoomNo;
 	}
 	
-	private double scoreEachMatchingKeywords(int[] eachMatchingNos){
-		double[] eachMatchingScores = new double[eachMatchingNos.length];
-		double eachMatchingScore = 0;
-		int roomNo = 0;
-		for(int matchingNo : eachMatchingNos){
-			eachMatchingScores[roomNo] = (double)matchingNo/documentTextSize;
-		}
-		for(double score : eachMatchingScores)
-			eachMatchingScore += score;
-		return eachMatchingScore /= eachMatchingScores.length;
-	}
-	
-	private int countTotalMatchingKeywords(){
-		int matchingNos = 0;
-		bodyContentsTransform();
-		for(String content : splitedBodyContents){
-			int searchKeywordMatchingNo = countTotalMatching(content);
-			if(searchKeywordMatchingNo!=0)
-				System.out.println("각 링크 페이지별 키워드 토탈 매칭 수 : "+searchKeywordMatchingNo);
-			if(searchKeywordMatchingNo==searchKeywordsArray.length)
-				matchingNos++;
-		}
-		return matchingNos;
-	}
-	
-	private void bodyContentsTransform() {
-		splitedBodyContents = bodyContents.split(firstSplitDelimiter);
-		bodyContents = String.join(secondSplitDelimiter, splitedBodyContents);
-		splitedBodyContents = bodyContents.split(Pattern.quote(secondSplitDelimiter));
-	}
-	
 	private int checkEmptyRoom(){
 		int emptyRoomNo=0;
 		for(String content : splitedBodyContents){
@@ -112,6 +100,27 @@ public class PerformanceChecker implements I_PerformanceChecker{
 				emptyRoomNo++;
 		}
 		return emptyRoomNo;
+	}
+	
+	private int countTotalMatchingKeywords(){
+		int matchingNo = 0;
+		bodyContentsTransform();
+		for(String content : splitedBodyContents){
+			int searchKeywordMatchingNo = countTotalMatching(content);
+			if(searchKeywordMatchingNo==searchKeywordsArray.length)				
+				matchingNo++;
+			
+			// 테스트
+			logger.info("countTotalMatchingKeywords / totalMatchingNo : "+matchingNo);
+			
+		}
+		return matchingNo;
+	}
+	
+	private void bodyContentsTransform() {
+		splitedBodyContents = bodyContents.split(firstSplitDelimiter);
+		bodyContents = String.join(secondSplitDelimiter, splitedBodyContents);
+		splitedBodyContents = bodyContents.split(Pattern.quote(secondSplitDelimiter));
 	}
 	
 	private int countTotalMatching(String content){
@@ -128,16 +137,23 @@ public class PerformanceChecker implements I_PerformanceChecker{
 		int matchingNoArrayNo = 0;
 		for(String searchKeyword : searchKeywordsArray){
 			matchingNos[matchingNoArrayNo] = countEachMatchingKeyword(searchKeyword);
-			System.out.println("각 링크 페이지 별 키워드 개별 매칭 수 : "+matchingNos[matchingNoArrayNo]);
+			
+			// 테스트
+			logger.info("countEachMatchingKeywords / eachMatchingNo : "+matchingNos[matchingNoArrayNo]);
+			
 			matchingNoArrayNo++;
 		}
+		
+		// 테스트
+		System.out.println("--- 검색 키워드 전체에 대한 개별 매칭 점수 체크 완료");
+		
 		return matchingNos;
 	}
 	
 	private int countEachMatchingKeyword(String searchKeyword){
 		int matchingNo = 0;
 		int searchPoint = 0;
-		while(bodyContents.indexOf(searchKeyword)>=0){
+		while(bodyContents.indexOf(searchKeyword, searchPoint)>=0){
 			try{
 				searchPoint = bodyContents.indexOf(searchKeyword, searchPoint)+1;
 				if(searchPoint<=0)

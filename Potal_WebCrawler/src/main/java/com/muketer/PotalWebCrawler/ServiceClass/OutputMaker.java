@@ -46,13 +46,13 @@ public class OutputMaker implements I_OutputMaker{
 			performanceScores = checkLinkPage(linkPages);
 			totalScore += sumPerformanceScores(performanceScores);
 			totalScoreSize += checkTotalScoreSize(performanceScores);
-			System.out.println("검색 결과 한 페이지 점수 측정 완료");
+			System.out.println("=============================== 검색 결과 한 페이지 점수 측정 완료");
 		}
-		return computeFinalScore(totalScoreSize, totalScore, performanceScores);
+		return computeFinalScore(totalScoreSize, totalScore);
 	}
 	
 
-	private double computeFinalScore(double totalScoreSize, double totalScore, double[] performanceScores){
+	private double computeFinalScore(double totalScoreSize, double totalScore){
 		return totalScore/totalScoreSize;
 	}
 	
@@ -95,8 +95,17 @@ public class OutputMaker implements I_OutputMaker{
 			int scoreArrayNo) throws IOException{
 		I_DocumentParser parser = new DocumentParser();		
 		String bodyContents = parser.documentParse(linkPage);
+		
+		// 테스트
+		System.out.println("----------------- 링크 페이지 하나 파싱 완료");
+		
 		I_PerformanceChecker checker = new PerformanceChecker(searchLinkOutputPageNo, searchRunTime,
 				searchKeywordsArray, bodyContents, "\n", ".", documentTextSize);
+		
 		performanceScores[scoreArrayNo] = checker.scoreCheck();
+		
+		// 테스트
+		System.out.println("----------------- 링크 페이지 하나 점수 체크 완료");
+		
 	}
 }

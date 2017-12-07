@@ -3,33 +3,17 @@ package com.muketer.PotalWebCrawler.ServiceClass;
 import java.io.IOException;
 
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.muketer.PotalWebCrawler.Searcher.CommonSearcher;
 import com.muketer.PotalWebCrawler.ServiceInterface.I_DocumentParser;
 
 @Service
 public class DocumentParser implements I_DocumentParser{
-	private class InnerParser{
-		protected int backCutting(String bodyContents, String backString, int frontCuttingPoint){
-			 return bodyContents.indexOf(backString, frontCuttingPoint)+1;
-		}
-		
-		protected String nextCutting(String bodyContents, String frontString, String backString, int frontCuttingPoint,
-				int backCuttingPoint){
-			int nextCuttingPoint = bodyContents.indexOf("<", backCuttingPoint);
-			if(nextCuttingPoint<0)
-				return bodyContents.substring(0, frontCuttingPoint)+bodyContents.substring(backCuttingPoint);
-			return bodyContents.substring(0, frontCuttingPoint)+bodyContents.substring(nextCuttingPoint);
-		}
-		
-		protected String removeText(String bodyContents, String frontString, String backString){
-			int frontCuttingPoint = bodyContents.indexOf(frontString);
-			if(frontCuttingPoint<0)
-				return bodyContents;
-			int	backCuttingPoint = backCutting(bodyContents, backString, frontCuttingPoint);
-			return nextCutting(bodyContents, frontString, backString, frontCuttingPoint, backCuttingPoint);
-		}
-	}
+	
+	private static final Logger logger = LoggerFactory.getLogger(DocumentParser.class);
 	
 	public DocumentParser(){}
 	
@@ -37,12 +21,20 @@ public class DocumentParser implements I_DocumentParser{
 	public String documentParse(Document linkPage) throws IOException{		
 		String bodyContents = pickHtmlBodyContents(linkPage);
 		
-		if(bodyContents==null)
+		if(bodyContents==null) {
+			
+			// 테스트
+			logger.info("documentParse / bodyContents==null");
+			
 			return null;
+		}
 		
 		bodyContents.trim();
 		bodyContents = removeNedlessCode(bodyContents, "<!--", ">", new InnerParser());
-		System.out.println("--- 코멘트 삭제 완료 ---");
+		
+		// 테스트
+		System.out.println("--- 코멘트 삭제 완료");
+		
 		bodyContents = removeNedlessCode(bodyContents, "<script", "</script>", new InnerParser(){
 			@Override
 			public int backCutting(String bodyContents, String backString, int frontCuttingPoint){
@@ -50,7 +42,10 @@ public class DocumentParser implements I_DocumentParser{
 				return bodyContents.indexOf(">", backCuttingPoint)+1;
 			}
 		});
-		System.out.println("--- script 코드 삭제 완료 ---");
+		
+		// 테스트
+		System.out.println("--- script 코드 삭제 완료");
+		
 		bodyContents = removeNedlessCode(bodyContents, "<", ">", new InnerParser(){
 			@Override
 			protected String nextCutting(String bodyContents, String frontString, String backString, int frontCuttingPoint,
@@ -58,7 +53,10 @@ public class DocumentParser implements I_DocumentParser{
 				return bodyContents.substring(0, frontCuttingPoint)+bodyContents.substring(backCuttingPoint);
 			}
 		});
-		System.out.println("--- 나머지 태그 삭제 완료 ---");
+		
+		// 테스트
+		System.out.println("--- 나머지 태그 삭제 완료");
+		
 		return bodyContents;
 	}
 	
@@ -66,8 +64,13 @@ public class DocumentParser implements I_DocumentParser{
 		String contents = linkPage.toString();
 		int frontCuttingPoint = htmlBodyStartingTag_IndexNo(contents)+1;
 		
-		if(frontCuttingPoint<=0)
+		if(frontCuttingPoint<=0) {
+		
+			// 테스트
+			logger.info("pickHtmlBodyContents / frontCuttingPoint<=0");
+			
 			return null;
+		}
 
 		int backCuttingPoint = contents.indexOf("</body>");
 		return contents.substring(frontCuttingPoint, backCuttingPoint);
@@ -76,8 +79,13 @@ public class DocumentParser implements I_DocumentParser{
 	private int htmlBodyStartingTag_IndexNo(String contents){
 		int cuttingPoint = contents.indexOf("<body");
 		
-		if(cuttingPoint<0)
+		if(cuttingPoint<0) {
+			
+			// 테스트
+			logger.info("htmlBodyStartingTag_IndexNo / cuttingPoint<0");
+			
 			return -1;
+		}
 		
 		return contents.indexOf(">", cuttingPoint);
 	}
@@ -88,4 +96,39 @@ public class DocumentParser implements I_DocumentParser{
 			bodyContents = innerParser.removeText(bodyContents, frontString, backString);
 		return bodyContents.trim();
 	}
+	
+	private class InnerParser{
+		protected int backCutting(String bodyContents, String backString, int frontCuttingPoint){
+			
+			// 테스트
+			logger.info("backCutting");
+			
+			 return bodyContents.indexOf(backString, frontCuttingPoint)+1;
+		}
+		
+		protected String nextCutting(String bodyContents, String frontString, String backString, int frontCuttingPoint,
+				int backCuttingPoint){
+			
+			// 테스트
+			logger.info("nextCutting");
+			
+			int nextCuttingPoint = bodyContents.indexOf("<", backCuttingPoint);
+			if(nextCuttingPoint<0)
+				return bodyContents.substring(0, frontCuttingPoint)+bodyContents.substring(backCuttingPoint);
+			return bodyContents.substring(0, frontCuttingPoint)+bodyContents.substring(nextCuttingPoint);
+		}
+		
+		protected String removeText(String bodyContents, String frontString, String backString){
+			
+			// 테스트
+			logger.info("removeText");
+			
+			int frontCuttingPoint = bodyContents.indexOf(frontString);
+			if(frontCuttingPoint<0)
+				return bodyContents;
+			int	backCuttingPoint = backCutting(bodyContents, backString, frontCuttingPoint);
+			return nextCutting(bodyContents, frontString, backString, frontCuttingPoint, backCuttingPoint);
+		}
+	}
+	
 }

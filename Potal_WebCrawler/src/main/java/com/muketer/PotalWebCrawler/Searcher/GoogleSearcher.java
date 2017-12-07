@@ -6,8 +6,12 @@ import java.util.List;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GoogleSearcher extends CommonSearcher{
+	
+	private static final Logger logger = LoggerFactory.getLogger(GoogleSearcher.class);
 	
 	public GoogleSearcher(String[] searchKeywordsArray){
 		super.domain = "https://www.google.com";
@@ -31,6 +35,9 @@ public class GoogleSearcher extends CommonSearcher{
 		String pageCountString = "";
 		Document doc = null;
 		
+		// 테스트
+		System.out.println("=============================== searchPage Document List 생성 시작");
+		
 		while(true){
 			pageCountString = String.valueOf(pageCountInt);
 			doc = super.makeDocument(super.makeDocumentType_defaultAtThisPortal,
@@ -43,7 +50,11 @@ public class GoogleSearcher extends CommonSearcher{
 			}
 			docs.add(doc);
 			pageCountInt += 10;
-		}		
+		}
+		
+		// 테스트
+		System.out.println("=============================== searchPage Document List 생성 완료");
+		
 		return docs;
 	}
 	
@@ -59,8 +70,19 @@ public class GoogleSearcher extends CommonSearcher{
 	@Override
 	protected void makeLinkPage(Element searchOutput_linkTitleElement, List<Document> page_linkPages){
 		String searchOutput_linkUri = searchOutput_linkTitleElement.attr("href");
-		if(searchOutput_linkUri.startsWith("/search?") || searchOutput_linkUri.startsWith("http"))
+		
+		// 테스트
+		logger.info("makeDocumentList - makeLinkPage / searchOutput_linkUri : "+searchOutput_linkUri);
+		System.out.println("-------------------------------");
+		
+		if(searchOutput_linkUri.startsWith("/search?") || searchOutput_linkUri.startsWith("http")) {
+			
+			// 테스트
+			logger.info("makeDocumentList - makeLinkPage / searchOutput_linkUri 에 /search? 나 http 포함");
+			System.out.println("-------------------------------");
+			
 			return;
+		}
 		searchOutput_linkUri = uriCut(searchOutput_linkUri);
 		Document doc = super.makeDocument(super.makeDocumentType_makeLinkPage,
 				super.charset_makeLinkPage, searchOutput_linkUri);

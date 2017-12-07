@@ -1,11 +1,16 @@
 package com.muketer.PotalWebCrawler.ServiceClass;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.muketer.PotalWebCrawler.ServiceInterface.I_SearchKeywordHandler;
 
 @Service
 public class SearchKeywordHandler implements I_SearchKeywordHandler{
+	
+	private static final Logger logger = LoggerFactory.getLogger(SearchKeywordHandler.class);
+	
 	private class ElementsRepository{
 		int cuttingPoint;
 		String searchKeyword;
@@ -64,13 +69,26 @@ public class SearchKeywordHandler implements I_SearchKeywordHandler{
 			}
 			repository.searchKeyword = str.substring(0, repository.cuttingPoint).trim();
 			searchKeywordsArray[arrayNo] = repository.searchKeyword;
+			
+			// 테스트
+			logger.info("searchKeyword : "+searchKeywordsArray[arrayNo]);
+			
 			str = str.substring(repository.cuttingPoint+1, str.length()).trim();
 			if(str.indexOf(" ")<0){
 				arrayNo++;
 				searchKeywordsArray[arrayNo] = str;
+				
+				// 테스트
+				logger.info("searchKeyword : "+searchKeywordsArray[arrayNo]);
+				
 				break;
 			}
 			arrayNo++;
+			
 		}
+		
+		// 테스트
+		System.out.println("=============================== keyword Handling 완료");
+		
 	}
 }

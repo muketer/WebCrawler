@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jsoup.nodes.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,7 @@ import com.muketer.PotalWebCrawler.Searcher.CommonSearcher;
 import com.muketer.PotalWebCrawler.Searcher.DaumSearcher;
 import com.muketer.PotalWebCrawler.Searcher.GoogleSearcher;
 import com.muketer.PotalWebCrawler.Searcher.NaverSearcher;
+import com.muketer.PotalWebCrawler.ServiceClass.DocumentParser;
 import com.muketer.PotalWebCrawler.ServiceClass.OutputMaker;
 import com.muketer.PotalWebCrawler.ServiceClass.SearchKeywordHandler;
 import com.muketer.PotalWebCrawler.ServiceInterface.I_DocumentParser;
@@ -25,6 +28,8 @@ import com.muketer.PotalWebCrawler.ServiceInterface.I_TemporaryDAOUser;
 
 @Controller
 public class MainController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 	
 	@Autowired
 	private I_SearchKeywordHandler handler;
@@ -60,6 +65,9 @@ public class MainController {
 		I_OutputMaker maker = new OutputMaker(searchKeywordsArray, searchOutput_linkPages,
 				searchRunTime, searchLinkOutputPageNo);
 		double googleScore = maker.checkLinkPages();
+		
+		// Å×½ºÆ®
+		logger.info("googleSearch / googleScore : "+googleScore);
 		
 		model.addAttribute("searchKeywords", dto.getSearchKeywords());
 		model.addAttribute("age", dto.getAge());
@@ -109,8 +117,8 @@ public class MainController {
 		model.addAttribute("naverScore", dto.getNaverScore());
 		model.addAttribute("daumScore", daumScore);
 		
-		dto.setDaumScore(daumScore);
-		daoUser.dataInsert(dto);
+		/*dto.setDaumScore(daumScore);
+		daoUser.dataInsert(dto);*/
 		
 		return "home";
 	}	
