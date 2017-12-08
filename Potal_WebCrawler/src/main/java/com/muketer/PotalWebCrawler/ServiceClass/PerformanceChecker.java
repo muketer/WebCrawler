@@ -3,8 +3,6 @@ package com.muketer.PotalWebCrawler.ServiceClass;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.muketer.PotalWebCrawler.ServiceInterface.I_PerformanceChecker;
@@ -27,21 +25,21 @@ public class PerformanceChecker implements I_PerformanceChecker{
 	 * 
 	 */
 	
-	private static final Logger logger = LoggerFactory.getLogger(PerformanceChecker.class);
+	/*
+	 * 여기서는 최종적으로 int[0]에 해당 페이지의 개별 매칭 평균, int[1]에 해당 페이지의 토탈 매칭 평균 담아서 리턴
+	 * 
+	 * OutputMaker에서 호출해서 쓸 위 배열 속 값들 더해서 평균 내거나 연산할 메소드 및
+	 * 최종 점수 계산할 메소드 만들고 OutputMaker에서 호출해서 계산 
+	 */
 	
-	private long searchLinkOutputPageNo, documentTextSize;
-	private double searchRunTime, eachMatchingScore, totalMatchingScore, finalScore;
+	private long documentTextSize;
 	private String[] searchKeywordsArray, splitedBodyContents;
 	private String bodyContents, firstSplitDelimiter, secondSplitDelimiter;
 	
-	public PerformanceChecker(){
-		
-	}
+	public PerformanceChecker(){}
 	
-	public PerformanceChecker(long searchLinkOutputPageNo, double searchRunTime, String[] searchKeywordsArray,
+	public PerformanceChecker(String[] searchKeywordsArray,
 			String bodyContents, String firstSplitDelimiter, String secondSplitDelimiter, long documentTextSize){
-		this.searchLinkOutputPageNo = searchLinkOutputPageNo;
-		this.searchRunTime = searchRunTime;
 		this.searchKeywordsArray = searchKeywordsArray;
 		this.bodyContents = bodyContents;
 		this.firstSplitDelimiter = firstSplitDelimiter;
@@ -50,24 +48,30 @@ public class PerformanceChecker implements I_PerformanceChecker{
 	}
 	
 	@Override
-	public double scoreCheck() throws IOException {
+	public void scoreCheck(double[] keywordMatchingScoresArray) throws IOException {
 		int[] eachMatchingNos = countEachMatchingKeywords();
 		int totalMatchingNo = countTotalMatchingKeywords(/*count, ScoreArrayNo*/);
-		eachMatchingScore = scoreEachMatchingKeywords(eachMatchingNos);	
-		totalMatchingScore = scoreTotalMatchingKeywords(totalMatchingNo);
-		computeFinalScore();
 		
-		return finalScore;
+		keywordMatchingScoresArray[0] += scoreEachMatchingKeywords(eachMatchingNos);	
+		keywordMatchingScoresArray[1] += scoreTotalMatchingKeywords(totalMatchingNo);
 	}
 	
-	
+	@Override
 	// 점수가 0인 부분이 있으면 여기서 에러 날 것
-	private void computeFinalScore(){
+	public double computeFinalScore(double searchRunTime, long searchLinkOutputPageNo,
+			double[] keywordMatchingScoresArray){
 		double totalMatchingScoreWeight = 0.55, eachMatchingScoreWeight = 0.25,
 				searchRunTimeWeight = 0.1, searchLinkOutputPageNoWeight = 0.1,
 				subWeight1 = 1000, subWeight2 = 0.001;
-		finalScore = (totalMatchingScore*totalMatchingScoreWeight+
-				eachMatchingScore*eachMatchingScoreWeight+
+		
+		// 테스트
+		System.out.println("PerformanceChecker - computeFinalScore / totalMatchingScore : "+keywordMatchingScoresArray[1]);
+		System.out.println("PerformanceChecker - computeFinalScore / eachMatchingScore : "+keywordMatchingScoresArray[0]);
+		System.out.println("PerformanceChecker - computeFinalScore / searchRunTime : "+searchRunTime);
+		System.out.println("PerformanceChecker - computeFinalScore / searchLinkOutputPageNo : "+searchLinkOutputPageNo);
+		
+		return (keywordMatchingScoresArray[1]*totalMatchingScoreWeight+
+				keywordMatchingScoresArray[0]*eachMatchingScoreWeight+
 				1/searchRunTime*searchRunTimeWeight)*subWeight1+
 				(double)searchLinkOutputPageNo*searchLinkOutputPageNoWeight*subWeight2;
 	}
@@ -110,8 +114,8 @@ public class PerformanceChecker implements I_PerformanceChecker{
 			if(searchKeywordMatchingNo==searchKeywordsArray.length)				
 				matchingNo++;
 			
-			// 테스트
-			logger.info("countTotalMatchingKeywords / totalMatchingNo : "+matchingNo);
+/*			// 테스트
+			System.out.println("PerformanceChecker - countTotalMatchingKeywords / totalMatchingNo : "+matchingNo);*/
 			
 		}
 		return matchingNo;
@@ -138,8 +142,8 @@ public class PerformanceChecker implements I_PerformanceChecker{
 		for(String searchKeyword : searchKeywordsArray){
 			matchingNos[matchingNoArrayNo] = countEachMatchingKeyword(searchKeyword);
 			
-			// 테스트
-			logger.info("countEachMatchingKeywords / eachMatchingNo : "+matchingNos[matchingNoArrayNo]);
+/*			// 테스트
+			System.out.println("PerformanceChecker - countEachMatchingKeywords / eachMatchingNo : "+matchingNos[matchingNoArrayNo]);*/
 			
 			matchingNoArrayNo++;
 		}

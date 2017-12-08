@@ -6,12 +6,8 @@ import java.util.List;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GoogleSearcher extends CommonSearcher{
-	
-	private static final Logger logger = LoggerFactory.getLogger(GoogleSearcher.class);
 	
 	public GoogleSearcher(String[] searchKeywordsArray){
 		super.domain = "https://www.google.com";
@@ -72,13 +68,13 @@ public class GoogleSearcher extends CommonSearcher{
 		String searchOutput_linkUri = searchOutput_linkTitleElement.attr("href");
 		
 		// 테스트
-		logger.info("makeDocumentList - makeLinkPage / searchOutput_linkUri : "+searchOutput_linkUri);
+		System.out.println("GoogleSearcher - makeDocumentList - makeLinkPage / searchOutput_linkUri : "+searchOutput_linkUri);
 		System.out.println("-------------------------------");
 		
 		if(searchOutput_linkUri.startsWith("/search?") || searchOutput_linkUri.startsWith("http")) {
 			
 			// 테스트
-			logger.info("makeDocumentList - makeLinkPage / searchOutput_linkUri 에 /search? 나 http 포함");
+			System.out.println("GoogleSearcher - makeDocumentList - makeLinkPage / searchOutput_linkUri 에 /search? 나 http 포함");
 			System.out.println("-------------------------------");
 			
 			return;

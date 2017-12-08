@@ -23,12 +23,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CommonSearcher {
-	
-	private static final Logger logger = LoggerFactory.getLogger(CommonSearcher.class);
 	
 	// ------------------------------- 멤버 필드 ---------------------------------
 	
@@ -168,7 +164,6 @@ public class CommonSearcher {
 	private void putDocumentList(int pageNo, Elements searchOutput_linkTitleElements,
 			Map<Integer, List<Document>> searchOutput_linkPages) {
 		List<Document> page_linkPages = new ArrayList<Document>();
-		Document doc = null;
 		
 		for(Element searchOutput_linkTitleElement : searchOutput_linkTitleElements){
 			makeLinkPage(searchOutput_linkTitleElement, page_linkPages);
@@ -180,7 +175,7 @@ public class CommonSearcher {
 		String searchOutput_linkUri = searchOutput_linkTitleElement.attr("href");
 		
 		// 테스트
-		logger.info("makeDocumentList - makeLinkPage / searchOutput_linkUri : "+searchOutput_linkUri);
+		System.out.println("CommonSearcher - makeDocumentList - makeLinkPage / searchOutput_linkUri : "+searchOutput_linkUri);
 		System.out.println("-------------------------------");
 		
 		Document doc = makeDocument(makeDocumentType_makeLinkPage, charset_makeLinkPage, searchOutput_linkUri);
@@ -202,7 +197,7 @@ public class CommonSearcher {
 	
 	private Document jsoupConnect(String searchUri){
 		// 테스트
-		logger.info("jsoupConnect / searchUri : "+searchUri);
+		System.out.println("CommonSearcher - jsoupConnect / searchUri : "+searchUri);
 		System.out.println("-------------------------------");
 		
 		try{
@@ -215,8 +210,8 @@ public class CommonSearcher {
 	
 	private Document parseOpenStream(String searchUri, String charset){
 		// 테스트
-		logger.info("parseOpenStream / searchUri : "+searchUri);
-		logger.info("parseOpenStream / charset : "+charset);
+		System.out.println("CommonSearcher - parseOpenStream / searchUri : "+searchUri);
+		System.out.println("CommonSearcher - parseOpenStream / charset : "+charset);
 		System.out.println("-------------------------------");
 		
 		try{
@@ -235,7 +230,7 @@ public class CommonSearcher {
 	
 	private Document httpGet(String searchUri){
 		// 테스트
-		logger.info("httpGet / searchUri : "+searchUri);
+		System.out.println("CommonSearcher - httpGet / searchUri : "+searchUri);
 		System.out.println("-------------------------------");
 		
 		HttpClient httpClient = new DefaultHttpClient();

@@ -43,7 +43,7 @@ public class MainController {
 	private I_TemporaryDAOUser daoUser;
 	
 	private String[] searchKeywordsArray;
-	private int limitPageNo;
+	private int limitPageNo = 20;
 	
 	@RequestMapping("/")
 	public String home(){
@@ -58,6 +58,10 @@ public class MainController {
 		
 		CommonSearcher googleSearcher = new GoogleSearcher(searchKeywordsArray);
 		double searchRunTime = googleSearcher.checkSearchRunTime();
+		
+		// 테스트
+		logger.info("googleSearch / searchRunTime : "+searchRunTime);
+		
 		long searchLinkOutputPageNo = googleSearcher.countTotalLinkOuputPage();
 		Map<Integer, List<Document>> searchOutput_linkPages = googleSearcher.parse();
 		limitPageNo = googleSearcher.countLimitLinkOutputPage(searchOutput_linkPages);
@@ -80,9 +84,20 @@ public class MainController {
 	@RequestMapping("/naverSearch")
 	public String naverSearch(SearchInformationDTO dto, Model model) throws IOException{
 		
+		I_SearchKeywordHandler handler = new SearchKeywordHandler(dto.getSearchKeywords());
+		searchKeywordsArray = handler.searchKeywordsHandling();
+		
 		CommonSearcher naverSearcher = new NaverSearcher(limitPageNo, searchKeywordsArray);
 		double searchRunTime = naverSearcher.checkSearchRunTime();
+		
+		// 테스트
+		logger.info("naverSearch / searchRunTime : "+searchRunTime);
+		
 		long searchLinkOutputPageNo = naverSearcher.countTotalLinkOuputPage();
+		
+		// 테스트
+		logger.info("naverSearch / searchLinkOutputPageNo : "+searchLinkOutputPageNo);
+		
 		Map<Integer, List<Document>> searchOutput_linkPages = naverSearcher.parse();
 		
 		I_OutputMaker maker = new OutputMaker(searchKeywordsArray, searchOutput_linkPages,
@@ -101,8 +116,15 @@ public class MainController {
 	@RequestMapping("/daumSearch")
 	public String daumSearch(SearchInformationDTO dto, Model model) throws IOException{
 		
+		I_SearchKeywordHandler handler = new SearchKeywordHandler(dto.getSearchKeywords());
+		searchKeywordsArray = handler.searchKeywordsHandling();
+		
 		CommonSearcher daumSearcher = new DaumSearcher(limitPageNo, searchKeywordsArray);
 		double searchRunTime = daumSearcher.checkSearchRunTime();
+		
+		// 테스트
+		logger.info("daumSearch / searchRunTime : "+searchRunTime);
+		
 		long searchLinkOutputPageNo = daumSearcher.countTotalLinkOuputPage();
 		Map<Integer, List<Document>> searchOutput_linkPages = daumSearcher.parse();
 		
